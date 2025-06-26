@@ -1,5 +1,5 @@
 //* Debug mode
-const DEBUG = false;
+const DEBUG = true;
 
 //* Canvas properties and variables
 const c = document.getElementById("gameCanvas");
@@ -10,7 +10,7 @@ let offsetX = 0;
 let offsetY = 0;
 c.width = canvasWidth;
 c.height = canvasHeight;
-let cellSize = 50; // Default
+let cellSize = 50; // Def
 let scale = 1;
 
 //* Canvas styling/setup
@@ -90,11 +90,11 @@ function drawGame() {
     let canvasXS = currentMatrix.a;
     let canvasYS = currentMatrix.d;
 
-    drawDefaultGrid();
+    // drawDefaultGrid();
     console.log("Number of X lines: " + xLineCount);
-    console.assert(xLineCount == canvasWidth / cellSize + 1);
+    console.assert(xLineCount == (worldRight + offsetX) / cellSize + 2);
     console.log("Number of Y lines: " + yLineCount);
-    console.assert(yLineCount == canvasHeight / cellSize + 1);
+    console.assert(yLineCount == (worldBottom + offsetY) / cellSize + 2);
     console.log("X Translation: " + canvasXT, "Y Translation: " + canvasYT);
     console.log("X Scale: " + canvasXS, "Y Scale: " + canvasYS);
   }
