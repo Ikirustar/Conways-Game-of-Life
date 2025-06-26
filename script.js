@@ -1,3 +1,6 @@
+//* Debug mode
+const DEBUG = false;
+
 //* Canvas properties and variables
 const c = document.getElementById("gameCanvas");
 const ctx = c.getContext("2d");
@@ -22,51 +25,79 @@ function drawGame() {
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, scale);
 
+  // World View
+  const worldTop = -offsetY;
+  const worldLeft = -offsetX;
+  const worldBottom = canvasHeight - offsetY;
+  const worldRight = canvasWidth - offsetX;
+
   // Line styling
-  ctx.strokeStyle = "rgb(161, 161, 161)";
+  ctx.strokeStyle = "rgb(0, 0, 0)";
   ctx.beginPath();
 
-  let lineCount = 0;
+  //* Drawing grid
+  let yLineCount = 0;
+  let xLineCount = 0;
 
-  //* Horizontal columns
-  for (let y = 0; y <= canvasHeight; y += cellSize) {
-    ctx.moveTo(0, y);
-    ctx.lineTo(canvasWidth, y);
-    lineCount++;
+  const startY = Math.floor(worldTop / cellSize) * cellSize;
+  const endY = Math.ceil(worldBottom / cellSize) * cellSize;
+
+  // Horizontal columns
+  for (let y = startY; y <= endY; y += cellSize) {
+    ctx.moveTo(worldLeft, y);
+    ctx.lineTo(worldRight, y);
+    yLineCount++;
   }
 
-  console.log("Number of Y lines: " + lineCount);
-  console.assert(lineCount == canvasHeight / cellSize + 1);
+  const startX = Math.floor(worldLeft / cellSize) * cellSize;
+  const endX = Math.ceil(worldRight / cellSize) * cellSize;
 
-  lineCount = 0;
-
-  //* Vertical columns
-  for (let x = 0; x <= canvasWidth; x += cellSize) {
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, canvasHeight);
-    lineCount++;
+  // Vertical columns
+  for (let x = startX; x <= endX; x += cellSize) {
+    ctx.moveTo(x, worldTop);
+    ctx.lineTo(x, worldBottom);
+    xLineCount++;
   }
+
   ctx.closePath();
   ctx.stroke();
 
-  console.log("Number of X lines: " + lineCount);
-  console.assert(lineCount == canvasWidth / cellSize + 1);
+  //* Draw origin lines
 
-  // Draw origin lines
-  ctx.strokeStyle = "Black";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(canvasWidth, 0);
-  ctx.closePath();
-  ctx.stroke();
+  ctx.strokeStyle = "rgb(145, 160, 240)";
+  ctx.lineWidth = 5;
 
   ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, canvasHeight);
+
+  // Horizontal
+  ctx.moveTo(worldLeft, 0);
+  ctx.lineTo(worldRight, 0);
+
+  // Vertical
+  ctx.moveTo(0, worldTop);
+  ctx.lineTo(0, worldBottom);
+
   ctx.closePath();
   ctx.stroke();
+
+  let currentMatrix = ctx.getTransform();
 
   ctx.restore();
+
+  if (DEBUG == true) {
+    let canvasXT = currentMatrix.e;
+    let canvasYT = currentMatrix.f;
+    let canvasXS = currentMatrix.a;
+    let canvasYS = currentMatrix.d;
+
+    drawDefaultGrid();
+    console.log("Number of X lines: " + xLineCount);
+    console.assert(xLineCount == canvasWidth / cellSize + 1);
+    console.log("Number of Y lines: " + yLineCount);
+    console.assert(yLineCount == canvasHeight / cellSize + 1);
+    console.log("X Translation: " + canvasXT, "Y Translation: " + canvasYT);
+    console.log("X Scale: " + canvasXS, "Y Scale: " + canvasYS);
+  }
 }
 
 //* Mouse event testing
@@ -81,7 +112,7 @@ function trackMosPos(e) {
   };
 }
 
-//* Left click
+// Left click
 c.addEventListener("click", function (e) {
   const mousePos = trackMosPos(e);
   let xPos = mousePos.x;
@@ -91,14 +122,16 @@ c.addEventListener("click", function (e) {
   offsetX = xPos;
   offsetY = yPos;
 
-  console.log("MouseX: " + xPos, "MouseY: " + yPos);
-  console.assert(xPos >= 0 && xPos <= canvasWidth);
-  console.assert(yPos >= 0 && yPos <= canvasHeight);
+  if (DEBUG == true) {
+    console.log("MouseX: " + xPos, "MouseY: " + yPos);
+    console.assert(xPos >= 0 && xPos <= canvasWidth);
+    console.assert(yPos >= 0 && yPos <= canvasHeight);
+  }
 
   drawGame();
 });
 
-//* right click
+// right click
 c.addEventListener("contextmenu", function (e) {
   const mousePos = trackMosPos(e);
   let xPos = mousePos.x;
@@ -108,13 +141,36 @@ c.addEventListener("contextmenu", function (e) {
   offsetX = xPos;
   offsetY = yPos;
 
-  console.log("MouseX: " + xPos, "MouseY: " + yPos);
-  console.assert(xPos >= 0 && xPos <= canvasWidth);
-  console.assert(yPos >= 0 && yPos <= canvasHeight);
+  if (DEBUG == true) {
+    console.log("MouseX: " + xPos, "MouseY: " + yPos);
+    console.assert(xPos >= 0 && xPos <= canvasWidth);
+    console.assert(yPos >= 0 && yPos <= canvasHeight);
+  }
 
   drawGame();
   e.preventDefault();
 });
+
+//* Debugging functions
+function drawDefaultGrid() {
+  // Line styling
+  ctx.strokeStyle = "rgb(164, 3, 3)";
+  ctx.beginPath();
+
+  //* Horizontal columns
+  for (let y = 0; y <= canvasHeight; y += cellSize) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvasWidth, y);
+  }
+
+  //* Vertical columns
+  for (let x = 0; x <= canvasWidth; x += cellSize) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvasHeight);
+  }
+  ctx.closePath();
+  ctx.stroke();
+}
 
 //* Game start
 
